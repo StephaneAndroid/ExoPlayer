@@ -15,6 +15,11 @@
  */
 package com.google.android.exoplayer.demo.player;
 
+import android.content.Context;
+import android.media.AudioManager;
+import android.media.MediaCodec;
+import android.os.Handler;
+
 import com.google.android.exoplayer.DefaultLoadControl;
 import com.google.android.exoplayer.LoadControl;
 import com.google.android.exoplayer.MediaCodecAudioTrackRenderer;
@@ -41,11 +46,6 @@ import com.google.android.exoplayer.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer.upstream.DefaultUriDataSource;
 import com.google.android.exoplayer.util.ManifestFetcher;
 import com.google.android.exoplayer.util.ManifestFetcher.ManifestCallback;
-
-import android.content.Context;
-import android.media.AudioManager;
-import android.media.MediaCodec;
-import android.os.Handler;
 
 import java.io.IOException;
 import java.util.List;
@@ -102,7 +102,7 @@ public class HlsRendererBuilder implements RendererBuilder {
       this.player = player;
       HlsPlaylistParser parser = new HlsPlaylistParser();
       playlistFetcher = new ManifestFetcher<>(url, new DefaultUriDataSource(context, userAgent),
-          parser);
+              parser);
     }
 
     public void init() {
@@ -136,18 +136,18 @@ public class HlsRendererBuilder implements RendererBuilder {
       // Build the video/audio/metadata renderers.
       DataSource dataSource = new DefaultUriDataSource(context, bandwidthMeter, userAgent);
       HlsChunkSource chunkSource = new HlsChunkSource(true /* isMaster */, dataSource, url,
-          manifest, DefaultHlsTrackSelector.newDefaultInstance(context), bandwidthMeter,
-          timestampAdjusterProvider, HlsChunkSource.ADAPTIVE_MODE_SPLICE);
+              manifest, CustomHlsTrackSelector.newCustomHlsTrackSelector(context), bandwidthMeter,
+              timestampAdjusterProvider, HlsChunkSource.ADAPTIVE_MODE_SPLICE);
       HlsSampleSource sampleSource = new HlsSampleSource(chunkSource, loadControl,
-          MAIN_BUFFER_SEGMENTS * BUFFER_SEGMENT_SIZE, mainHandler, player, DemoPlayer.TYPE_VIDEO);
+              MAIN_BUFFER_SEGMENTS * BUFFER_SEGMENT_SIZE, mainHandler, player, DemoPlayer.TYPE_VIDEO);
       MediaCodecVideoTrackRenderer videoRenderer = new MediaCodecVideoTrackRenderer(context,
-          sampleSource, MediaCodecSelector.DEFAULT, MediaCodec.VIDEO_SCALING_MODE_SCALE_TO_FIT,
-          5000, mainHandler, player, 50);
+              sampleSource, MediaCodecSelector.DEFAULT, MediaCodec.VIDEO_SCALING_MODE_SCALE_TO_FIT,
+              5000, mainHandler, player, 50);
       MediaCodecAudioTrackRenderer audioRenderer = new MediaCodecAudioTrackRenderer(sampleSource,
-          MediaCodecSelector.DEFAULT, null, true, player.getMainHandler(), player,
-          AudioCapabilities.getCapabilities(context), AudioManager.STREAM_MUSIC);
+              MediaCodecSelector.DEFAULT, null, true, player.getMainHandler(), player,
+              AudioCapabilities.getCapabilities(context), AudioManager.STREAM_MUSIC);
       MetadataTrackRenderer<List<Id3Frame>> id3Renderer = new MetadataTrackRenderer<>(
-          sampleSource, new Id3Parser(), player, mainHandler.getLooper());
+              sampleSource, new Id3Parser(), player, mainHandler.getLooper());
 
       // Build the text renderer, preferring Webvtt where available.
       boolean preferWebvtt = false;
@@ -158,10 +158,10 @@ public class HlsRendererBuilder implements RendererBuilder {
       if (preferWebvtt) {
         DataSource textDataSource = new DefaultUriDataSource(context, bandwidthMeter, userAgent);
         HlsChunkSource textChunkSource = new HlsChunkSource(false /* isMaster */, textDataSource,
-            url, manifest, DefaultHlsTrackSelector.newVttInstance(), bandwidthMeter,
-            timestampAdjusterProvider, HlsChunkSource.ADAPTIVE_MODE_SPLICE);
+                url, manifest, DefaultHlsTrackSelector.newVttInstance(), bandwidthMeter,
+                timestampAdjusterProvider, HlsChunkSource.ADAPTIVE_MODE_SPLICE);
         HlsSampleSource textSampleSource = new HlsSampleSource(textChunkSource, loadControl,
-            TEXT_BUFFER_SEGMENTS * BUFFER_SEGMENT_SIZE, mainHandler, player, DemoPlayer.TYPE_TEXT);
+                TEXT_BUFFER_SEGMENTS * BUFFER_SEGMENT_SIZE, mainHandler, player, DemoPlayer.TYPE_TEXT);
         textRenderer = new TextTrackRenderer(textSampleSource, player, mainHandler.getLooper());
       } else {
         textRenderer = new Eia608TrackRenderer(sampleSource, player, mainHandler.getLooper());
