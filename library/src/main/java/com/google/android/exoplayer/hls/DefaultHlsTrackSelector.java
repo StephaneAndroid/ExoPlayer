@@ -15,10 +15,10 @@
  */
 package com.google.android.exoplayer.hls;
 
-import com.google.android.exoplayer.chunk.VideoFormatSelectorUtil;
-
 import android.content.Context;
 import android.text.TextUtils;
+
+import com.google.android.exoplayer.chunk.VideoFormatSelectorUtil;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -75,7 +75,7 @@ public final class DefaultHlsTrackSelector implements HlsTrackSelector {
 
     ArrayList<Variant> enabledVariantList = new ArrayList<>();
     int[] variantIndices = VideoFormatSelectorUtil.selectVideoFormatsForDefaultDisplay(
-        context, playlist.variants, null, false);
+            context, playlist.variants, null, false);
     for (int i = 0; i < variantIndices.length; i++) {
       enabledVariantList.add(playlist.variants.get(variantIndices[i]));
     }
@@ -107,7 +107,7 @@ public final class DefaultHlsTrackSelector implements HlsTrackSelector {
     if (enabledVariantList.size() > 1) {
       Variant[] enabledVariants = new Variant[enabledVariantList.size()];
       enabledVariantList.toArray(enabledVariants);
-      output.adaptiveTrack(playlist, enabledVariants);
+      output.adaptiveTrack(playlist, enabledVariants, 0);
     }
     for (int i = 0; i < enabledVariantList.size(); i++) {
       output.fixedTrack(playlist, enabledVariantList.get(i));

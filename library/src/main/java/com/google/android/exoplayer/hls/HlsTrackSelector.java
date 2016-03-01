@@ -33,8 +33,9 @@ public interface HlsTrackSelector {
      *
      * @param playlist The master playlist being processed.
      * @param variants The variants to use for the adaptive track.
+     * @param initialIndex The initial index of variants to use for start playing the adaptive track.
      */
-    void adaptiveTrack(HlsMasterPlaylist playlist, Variant[] variants);
+    void adaptiveTrack(HlsMasterPlaylist playlist, Variant[] variants, int initialIndex);
 
     /**
      * Outputs an fixed track corresponding to the specified representation in the specified

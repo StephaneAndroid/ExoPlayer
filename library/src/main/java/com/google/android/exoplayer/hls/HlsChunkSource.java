@@ -15,6 +15,11 @@
  */
 package com.google.android.exoplayer.hls;
 
+import android.net.Uri;
+import android.os.SystemClock;
+import android.text.TextUtils;
+import android.util.Log;
+
 import com.google.android.exoplayer.BehindLiveWindowException;
 import com.google.android.exoplayer.C;
 import com.google.android.exoplayer.MediaFormat;
@@ -36,11 +41,6 @@ import com.google.android.exoplayer.util.Assertions;
 import com.google.android.exoplayer.util.MimeTypes;
 import com.google.android.exoplayer.util.UriUtil;
 import com.google.android.exoplayer.util.Util;
-
-import android.net.Uri;
-import android.os.SystemClock;
-import android.text.TextUtils;
-import android.util.Log;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -176,11 +176,11 @@ public class HlsChunkSource implements HlsTrackSelector.Output {
    *     {@link #ADAPTIVE_MODE_SPLICE}.
    */
   public HlsChunkSource(boolean isMaster, DataSource dataSource, String playlistUrl,
-      HlsPlaylist playlist, HlsTrackSelector trackSelector, BandwidthMeter bandwidthMeter,
-      PtsTimestampAdjusterProvider timestampAdjusterProvider, int adaptiveMode) {
+                        HlsPlaylist playlist, HlsTrackSelector trackSelector, BandwidthMeter bandwidthMeter,
+                        PtsTimestampAdjusterProvider timestampAdjusterProvider, int adaptiveMode) {
     this(isMaster, dataSource, playlistUrl, playlist, trackSelector, bandwidthMeter,
-        timestampAdjusterProvider, adaptiveMode, DEFAULT_MIN_BUFFER_TO_SWITCH_UP_MS,
-        DEFAULT_MAX_BUFFER_TO_SWITCH_DOWN_MS);
+            timestampAdjusterProvider, adaptiveMode, DEFAULT_MIN_BUFFER_TO_SWITCH_UP_MS,
+            DEFAULT_MAX_BUFFER_TO_SWITCH_DOWN_MS);
   }
 
   /**
@@ -204,9 +204,9 @@ public class HlsChunkSource implements HlsTrackSelector.Output {
    *     for a switch to a lower quality variant to be considered.
    */
   public HlsChunkSource(boolean isMaster, DataSource dataSource, String playlistUrl,
-      HlsPlaylist playlist, HlsTrackSelector trackSelector, BandwidthMeter bandwidthMeter,
-      PtsTimestampAdjusterProvider timestampAdjusterProvider, int adaptiveMode,
-      long minBufferDurationToSwitchUpMs, long maxBufferDurationToSwitchDownMs) {
+                        HlsPlaylist playlist, HlsTrackSelector trackSelector, BandwidthMeter bandwidthMeter,
+                        PtsTimestampAdjusterProvider timestampAdjusterProvider, int adaptiveMode,
+                        long minBufferDurationToSwitchUpMs, long maxBufferDurationToSwitchDownMs) {
     this.isMaster = isMaster;
     this.dataSource = dataSource;
     this.trackSelector = trackSelector;
@@ -223,11 +223,11 @@ public class HlsChunkSource implements HlsTrackSelector.Output {
       masterPlaylist = (HlsMasterPlaylist) playlist;
     } else {
       Format format = new Format("0", MimeTypes.APPLICATION_M3U8, -1, -1, -1, -1, -1, -1, null,
-          null);
+              null);
       List<Variant> variants = new ArrayList<>();
       variants.add(new Variant(playlistUrl, format));
       masterPlaylist = new HlsMasterPlaylist(playlistUrl, variants,
-          Collections.<Variant>emptyList());
+              Collections.<Variant>emptyList());
     }
   }
 
@@ -369,7 +369,7 @@ public class HlsChunkSource implements HlsTrackSelector.Output {
    *     unused.
    */
   public void getChunkOperation(TsChunk previousTsChunk, long playbackPositionUs,
-      ChunkOperationHolder out) {
+                                ChunkOperationHolder out) {
     int nextVariantIndex;
     boolean switchingVariantSpliced;
     if (adaptiveMode == ADAPTIVE_MODE_NONE) {
@@ -378,8 +378,8 @@ public class HlsChunkSource implements HlsTrackSelector.Output {
     } else {
       nextVariantIndex = getNextVariantIndex(previousTsChunk, playbackPositionUs);
       switchingVariantSpliced = previousTsChunk != null
-          && !variants[nextVariantIndex].format.equals(previousTsChunk.format)
-          && adaptiveMode == ADAPTIVE_MODE_SPLICE;
+              && !variants[nextVariantIndex].format.equals(previousTsChunk.format)
+              && adaptiveMode == ADAPTIVE_MODE_SPLICE;
     }
 
     HlsMediaPlaylist mediaPlaylist = variantPlaylists[nextVariantIndex];
@@ -396,7 +396,7 @@ public class HlsChunkSource implements HlsTrackSelector.Output {
         chunkMediaSequence = getLiveStartChunkMediaSequence(nextVariantIndex);
       } else {
         chunkMediaSequence = switchingVariantSpliced
-            ? previousTsChunk.chunkIndex : previousTsChunk.chunkIndex + 1;
+                ? previousTsChunk.chunkIndex : previousTsChunk.chunkIndex + 1;
         if (chunkMediaSequence < mediaPlaylist.mediaSequence) {
           fatalError = new BehindLiveWindowException();
           return;
@@ -406,10 +406,10 @@ public class HlsChunkSource implements HlsTrackSelector.Output {
       // Not live.
       if (previousTsChunk == null) {
         chunkMediaSequence = Util.binarySearchFloor(mediaPlaylist.segments, playbackPositionUs,
-            true, true) + mediaPlaylist.mediaSequence;
+                true, true) + mediaPlaylist.mediaSequence;
       } else {
         chunkMediaSequence = switchingVariantSpliced
-            ? previousTsChunk.chunkIndex : previousTsChunk.chunkIndex + 1;
+                ? previousTsChunk.chunkIndex : previousTsChunk.chunkIndex + 1;
       }
     }
 
@@ -443,7 +443,7 @@ public class HlsChunkSource implements HlsTrackSelector.Output {
 
     // Configure the data source and spec for the chunk.
     DataSpec dataSpec = new DataSpec(chunkUri, segment.byterangeOffset, segment.byterangeLength,
-        null);
+            null);
 
     // Compute start and end times, and the sequence number of the next chunk.
     long startTimeUs;
@@ -471,15 +471,15 @@ public class HlsChunkSource implements HlsTrackSelector.Output {
       // case below.
       Extractor extractor = new AdtsExtractor(startTimeUs);
       extractorWrapper = new HlsExtractorWrapper(trigger, format, startTimeUs, extractor,
-          switchingVariantSpliced, MediaFormat.NO_VALUE, MediaFormat.NO_VALUE);
+              switchingVariantSpliced, MediaFormat.NO_VALUE, MediaFormat.NO_VALUE);
     } else if (lastPathSegment.endsWith(MP3_FILE_EXTENSION)) {
       Extractor extractor = new Mp3Extractor(startTimeUs);
       extractorWrapper = new HlsExtractorWrapper(trigger, format, startTimeUs, extractor,
-          switchingVariantSpliced, MediaFormat.NO_VALUE, MediaFormat.NO_VALUE);
+              switchingVariantSpliced, MediaFormat.NO_VALUE, MediaFormat.NO_VALUE);
     } else if (lastPathSegment.endsWith(WEBVTT_FILE_EXTENSION)
-        || lastPathSegment.endsWith(VTT_FILE_EXTENSION)) {
+            || lastPathSegment.endsWith(VTT_FILE_EXTENSION)) {
       PtsTimestampAdjuster timestampAdjuster = timestampAdjusterProvider.getAdjuster(isMaster,
-          segment.discontinuitySequenceNumber, startTimeUs);
+              segment.discontinuitySequenceNumber, startTimeUs);
       if (timestampAdjuster == null) {
         // The master source has yet to instantiate an adjuster for the discontinuity sequence.
         // TODO: There's probably an edge case if the master starts playback at a chunk belonging to
@@ -488,13 +488,13 @@ public class HlsChunkSource implements HlsTrackSelector.Output {
       }
       Extractor extractor = new WebvttExtractor(timestampAdjuster);
       extractorWrapper = new HlsExtractorWrapper(trigger, format, startTimeUs, extractor,
-          switchingVariantSpliced, MediaFormat.NO_VALUE, MediaFormat.NO_VALUE);
+              switchingVariantSpliced, MediaFormat.NO_VALUE, MediaFormat.NO_VALUE);
     } else if (previousTsChunk == null
-        || previousTsChunk.discontinuitySequenceNumber != segment.discontinuitySequenceNumber
-        || !format.equals(previousTsChunk.format)) {
+            || previousTsChunk.discontinuitySequenceNumber != segment.discontinuitySequenceNumber
+            || !format.equals(previousTsChunk.format)) {
       // MPEG-2 TS segments, but we need a new extractor.
       PtsTimestampAdjuster timestampAdjuster = timestampAdjusterProvider.getAdjuster(isMaster,
-          segment.discontinuitySequenceNumber, startTimeUs);
+              segment.discontinuitySequenceNumber, startTimeUs);
       if (timestampAdjuster == null) {
         // The master source has yet to instantiate an adjuster for the discontinuity sequence.
         return;
@@ -515,15 +515,15 @@ public class HlsChunkSource implements HlsTrackSelector.Output {
       Extractor extractor = new TsExtractor(timestampAdjuster, workaroundFlags);
       ExposedTrack selectedTrack = tracks.get(selectedTrackIndex);
       extractorWrapper = new HlsExtractorWrapper(trigger, format, startTimeUs, extractor,
-          switchingVariantSpliced, selectedTrack.adaptiveMaxWidth, selectedTrack.adaptiveMaxHeight);
+              switchingVariantSpliced, selectedTrack.adaptiveMaxWidth, selectedTrack.adaptiveMaxHeight);
     } else {
       // MPEG-2 TS segments, and we need to continue using the same extractor.
       extractorWrapper = previousTsChunk.extractorWrapper;
     }
 
     out.chunk = new TsChunk(dataSource, dataSpec, trigger, format, startTimeUs, endTimeUs,
-        chunkMediaSequence, segment.discontinuitySequenceNumber, extractorWrapper, encryptionKey,
-        encryptionIv);
+            chunkMediaSequence, segment.discontinuitySequenceNumber, extractorWrapper, encryptionKey,
+            encryptionIv);
   }
 
   /**
@@ -541,7 +541,7 @@ public class HlsChunkSource implements HlsTrackSelector.Output {
       EncryptionKeyChunk encryptionKeyChunk = (EncryptionKeyChunk) chunk;
       scratchSpace = encryptionKeyChunk.getDataHolder();
       setEncryptionData(encryptionKeyChunk.dataSpec.uri, encryptionKeyChunk.iv,
-          encryptionKeyChunk.getResult());
+              encryptionKeyChunk.getResult());
     }
   }
 
@@ -555,9 +555,9 @@ public class HlsChunkSource implements HlsTrackSelector.Output {
    */
   public boolean onChunkLoadError(Chunk chunk, IOException e) {
     if (chunk.bytesLoaded() == 0
-        && (chunk instanceof TsChunk || chunk instanceof MediaPlaylistChunk
+            && (chunk instanceof TsChunk || chunk instanceof MediaPlaylistChunk
             || chunk instanceof EncryptionKeyChunk)
-        && (e instanceof InvalidResponseCodeException)) {
+            && (e instanceof InvalidResponseCodeException)) {
       InvalidResponseCodeException responseCodeException = (InvalidResponseCodeException) e;
       int responseCode = responseCodeException.responseCode;
       if (responseCode == 404 || responseCode == 410) {
@@ -577,17 +577,17 @@ public class HlsChunkSource implements HlsTrackSelector.Output {
         if (alreadyBlacklisted) {
           // The playlist was already blacklisted.
           Log.w(TAG, "Already blacklisted variant (" + responseCode + "): "
-              + chunk.dataSpec.uri);
+                  + chunk.dataSpec.uri);
           return false;
         } else if (!allVariantsBlacklisted()) {
           // We've handled the 404/410 by blacklisting the variant.
           Log.w(TAG, "Blacklisted variant (" + responseCode + "): "
-              + chunk.dataSpec.uri);
+                  + chunk.dataSpec.uri);
           return true;
         } else {
           // This was the last non-blacklisted playlist. Don't blacklist it.
           Log.w(TAG, "Final variant not blacklisted (" + responseCode + "): "
-              + chunk.dataSpec.uri);
+                  + chunk.dataSpec.uri);
           variantBlacklistTimes[variantIndex] = 0;
           return false;
         }
@@ -599,10 +599,12 @@ public class HlsChunkSource implements HlsTrackSelector.Output {
   // HlsTrackSelector.Output implementation.
 
   @Override
-  public void adaptiveTrack(HlsMasterPlaylist playlist, Variant[] variants) {
+  public void adaptiveTrack(HlsMasterPlaylist playlist, Variant[] variants, int initialVariantIndex) {
+    final Variant initialVariant = variants[initialVariantIndex];
+
     Arrays.sort(variants, new Comparator<Variant>() {
       private final Comparator<Format> formatComparator =
-          new Format.DecreasingBandwidthComparator();
+              new Format.DecreasingBandwidthComparator();
       @Override
       public int compare(Variant first, Variant second) {
         return formatComparator.compare(first.format, second.format);
@@ -613,14 +615,11 @@ public class HlsChunkSource implements HlsTrackSelector.Output {
     int maxWidth = -1;
     int maxHeight = -1;
 
-    int minOriginalVariantIndex = Integer.MAX_VALUE;
     for (int i = 0; i < variants.length; i++) {
-      int originalVariantIndex = playlist.variants.indexOf(variants[i]);
-      if (originalVariantIndex < minOriginalVariantIndex) {
-        minOriginalVariantIndex = originalVariantIndex;
+      Format variantFormat = variants[i].format;
+      if (variants[i].format.id.equals(initialVariant.format.id)) {
         defaultVariantIndex = i;
       }
-      Format variantFormat = variants[i].format;
       maxWidth = Math.max(variantFormat.width, maxWidth);
       maxHeight = Math.max(variantFormat.height, maxHeight);
     }
@@ -661,11 +660,11 @@ public class HlsChunkSource implements HlsTrackSelector.Output {
     // We're not using the ideal variant for the available bandwidth, but only switch if the
     // conditions are appropriate.
     long bufferedPositionUs = adaptiveMode == ADAPTIVE_MODE_SPLICE ? previousTsChunk.startTimeUs
-        : previousTsChunk.endTimeUs;
+            : previousTsChunk.endTimeUs;
     long bufferedUs = bufferedPositionUs - playbackPositionUs;
     if (variantBlacklistTimes[selectedVariantIndex] != 0
-        || (idealIndex > selectedVariantIndex && bufferedUs < maxBufferDurationToSwitchDownUs)
-        || (idealIndex < selectedVariantIndex && bufferedUs > minBufferDurationToSwitchUpUs)) {
+            || (idealIndex > selectedVariantIndex && bufferedUs < maxBufferDurationToSwitchDownUs)
+            || (idealIndex < selectedVariantIndex && bufferedUs > minBufferDurationToSwitchUpUs)) {
       // Switch variant.
       return idealIndex;
     }
@@ -697,7 +696,7 @@ public class HlsChunkSource implements HlsTrackSelector.Output {
     // Don't re-request media playlist more often than one-half of the target duration.
     HlsMediaPlaylist mediaPlaylist = variantPlaylists[nextVariantIndex];
     long timeSinceLastMediaPlaylistLoadMs =
-        SystemClock.elapsedRealtime() - variantLastPlaylistLoadTimesMs[nextVariantIndex];
+            SystemClock.elapsedRealtime() - variantLastPlaylistLoadTimesMs[nextVariantIndex];
     return timeSinceLastMediaPlaylistLoadMs >= (mediaPlaylist.targetDurationSecs * 1000) / 2;
   }
 
@@ -711,9 +710,9 @@ public class HlsChunkSource implements HlsTrackSelector.Output {
   private MediaPlaylistChunk newMediaPlaylistChunk(int variantIndex) {
     Uri mediaPlaylistUri = UriUtil.resolveToUri(baseUri, variants[variantIndex].url);
     DataSpec dataSpec = new DataSpec(mediaPlaylistUri, 0, C.LENGTH_UNBOUNDED, null,
-        DataSpec.FLAG_ALLOW_GZIP);
+            DataSpec.FLAG_ALLOW_GZIP);
     return new MediaPlaylistChunk(dataSource, dataSpec, scratchSpace, playlistParser, variantIndex,
-        mediaPlaylistUri.toString());
+            mediaPlaylistUri.toString());
   }
 
   private EncryptionKeyChunk newEncryptionKeyChunk(Uri keyUri, String iv, int variantIndex) {
@@ -733,7 +732,7 @@ public class HlsChunkSource implements HlsTrackSelector.Output {
     byte[] ivDataWithPadding = new byte[16];
     int offset = ivData.length > 16 ? ivData.length - 16 : 0;
     System.arraycopy(ivData, offset, ivDataWithPadding, ivDataWithPadding.length - ivData.length
-        + offset, ivData.length - offset);
+            + offset, ivData.length - offset);
 
     encryptionKeyUri = keyUri;
     encryptionKey = secretKey;
@@ -768,7 +767,7 @@ public class HlsChunkSource implements HlsTrackSelector.Output {
     long currentTime = SystemClock.elapsedRealtime();
     for (int i = 0; i < variantBlacklistTimes.length; i++) {
       if (variantBlacklistTimes[i] != 0
-          && currentTime - variantBlacklistTimes[i] > DEFAULT_PLAYLIST_BLACKLIST_MS) {
+              && currentTime - variantBlacklistTimes[i] > DEFAULT_PLAYLIST_BLACKLIST_MS) {
         variantBlacklistTimes[i] = 0;
       }
     }
@@ -802,7 +801,7 @@ public class HlsChunkSource implements HlsTrackSelector.Output {
     }
 
     public ExposedTrack(Variant[] adaptiveVariants, int defaultVariantIndex, int maxWidth,
-        int maxHeight) {
+                        int maxHeight) {
       this.variants = adaptiveVariants;
       this.defaultVariantIndex = defaultVariantIndex;
       this.adaptiveMaxWidth = maxWidth;
@@ -821,9 +820,9 @@ public class HlsChunkSource implements HlsTrackSelector.Output {
     private HlsMediaPlaylist result;
 
     public MediaPlaylistChunk(DataSource dataSource, DataSpec dataSpec, byte[] scratchSpace,
-        HlsPlaylistParser playlistParser, int variantIndex, String playlistUrl) {
+                              HlsPlaylistParser playlistParser, int variantIndex, String playlistUrl) {
       super(dataSource, dataSpec, Chunk.TYPE_MANIFEST, Chunk.TRIGGER_UNSPECIFIED, null,
-          Chunk.NO_PARENT_ID, scratchSpace);
+              Chunk.NO_PARENT_ID, scratchSpace);
       this.variantIndex = variantIndex;
       this.playlistParser = playlistParser;
       this.playlistUrl = playlistUrl;
@@ -832,7 +831,7 @@ public class HlsChunkSource implements HlsTrackSelector.Output {
     @Override
     protected void consume(byte[] data, int limit) throws IOException {
       result = (HlsMediaPlaylist) playlistParser.parse(playlistUrl,
-          new ByteArrayInputStream(data, 0, limit));
+              new ByteArrayInputStream(data, 0, limit));
     }
 
     public HlsMediaPlaylist getResult() {
@@ -849,9 +848,9 @@ public class HlsChunkSource implements HlsTrackSelector.Output {
     private byte[] result;
 
     public EncryptionKeyChunk(DataSource dataSource, DataSpec dataSpec, byte[] scratchSpace,
-        String iv, int variantIndex) {
+                              String iv, int variantIndex) {
       super(dataSource, dataSpec, Chunk.TYPE_DRM, Chunk.TRIGGER_UNSPECIFIED, null,
-          Chunk.NO_PARENT_ID, scratchSpace);
+              Chunk.NO_PARENT_ID, scratchSpace);
       this.iv = iv;
       this.variantIndex = variantIndex;
     }
